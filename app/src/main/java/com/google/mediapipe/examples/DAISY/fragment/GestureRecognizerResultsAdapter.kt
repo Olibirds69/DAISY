@@ -5,7 +5,9 @@ import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
+import com.google.mediapipe.examples.gesturerecognizer.R
 import com.google.mediapipe.examples.gesturerecognizer.databinding.ItemGestureRecognizerResultBinding
 import com.google.mediapipe.tasks.components.containers.Category
 import java.util.Locale
@@ -14,8 +16,8 @@ import kotlin.math.min
 class GestureRecognizerResultsAdapter : RecyclerView.Adapter<GestureRecognizerResultsAdapter.ViewHolder>() {
     companion object {
         private const val NO_VALUE = "--"
-        private const val PAUSE_DELAY = 1000L  // 1-second pause between updates
-        private const val CLEAR_DELAY = 5000L  // 5 seconds delay before clearing text
+        private const val PAUSE_DELAY = 3000L  // 3 seconds pause between updates
+        private const val CLEAR_DELAY = 60000L  // 60 seconds delay before clearing text
     }
 
     private var adapterCategories: MutableList<Category?> = mutableListOf()
@@ -37,10 +39,9 @@ class GestureRecognizerResultsAdapter : RecyclerView.Adapter<GestureRecognizerRe
                     for (i in 0 until min) {
                         val category = sortedCategories[i]
                         val label = category.categoryName()
-                        val score = category.score()
 
-                        // Append to the sentence, making it look continuous
-                        resultSentence += "$label (${String.format(Locale.US, "%.2f", score)}) "
+                        // Combine gestures for both hands if needed
+                        resultSentence += "$label. "  // Appends the gesture name, without the score
 
                         // After each append, notify the adapter and delay the next update
                         notifyDataSetChanged()
@@ -56,7 +57,7 @@ class GestureRecognizerResultsAdapter : RecyclerView.Adapter<GestureRecognizerRe
                     handler.postDelayed({
                         resultSentence = ""  // Clear the sentence
                         notifyDataSetChanged()  // Refresh the RecyclerView
-                    }, CLEAR_DELAY)  // Clear after 5 seconds
+                    }, CLEAR_DELAY)  // Clear after 9 seconds
                 }, PAUSE_DELAY)
             }
         }
@@ -69,6 +70,14 @@ class GestureRecognizerResultsAdapter : RecyclerView.Adapter<GestureRecognizerRe
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemGestureRecognizerResultBinding.inflate(
             LayoutInflater.from(parent.context), parent, false)
+
+        // Set up the button for clearing text
+        val clearButton: Button = binding.root.findViewById(R.id.btnClearText)
+        clearButton.setOnClickListener {
+            resultSentence = ""  // Clear the sentence
+            notifyDataSetChanged()  // Refresh the RecyclerView
+        }
+
         return ViewHolder(binding)
     }
 
